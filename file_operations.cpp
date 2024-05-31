@@ -42,11 +42,10 @@ std::vector<std::byte> readBinaryFile(const std::string &filepath) {
 
 std::vector<int> bytesToInt(const std::vector<std::byte> &bytes) {
 	std::vector<int> int_vector;
+    char *ptr = const_cast<char*>(reinterpret_cast<const char*>(bytes.data()));
 	for (int i = 0; i < bytes.size(); i+=sizeof(int)) {
-        int tmp = static_cast<int>(static_cast<unsigned char>(bytes[i]) |
-                  static_cast<unsigned char>(bytes[i + 1]) << 8 |
-                  static_cast<unsigned char>(bytes[i + 2]) << 16 |
-                  static_cast<unsigned char>(bytes[i + 3]) << 24);
+        int tmp;
+        std::memcpy(&tmp, ptr + i, sizeof(int));
         int_vector.push_back(tmp);
 	}
 	return int_vector;
