@@ -70,3 +70,31 @@ int Catalog::convertQuantaToInt(std::string &quanta) {
 	}
 	return tmp;
 }
+
+std::vector<Catalog::Line> Catalog::selectSeries() {
+    std::vector<Catalog::Line> series(this->getLines());
+    int quanta, selectionRule;
+    std::cout << "Enter quanta and selection rule separated by space:\n" << "ex. for a-type R-branch 0,1 transitions, you would enterl '2 0' for deltaKa = 0, followed by '1 0' for R-branch, and finally '1 1' for deltaKc = 1\n";
+    while (std::cin >> quanta >> selectionRule) {
+        series.erase(std::remove_if(series.begin(), series.end(), [quanta, selectionRule](const Catalog::Line &line) {
+            switch (quanta) {
+                case 1:
+                    return line.quanta1Prime - line.quanta1 != selectionRule;
+                case 2:
+                    return line.quanta2Prime - line.quanta2 != selectionRule;
+                case 3:
+                    return line.quanta3Prime - line.quanta3 != selectionRule;
+                case 4:
+                    return line.quanta4Prime - line.quanta4 != selectionRule;
+                case 5:
+                    return line.quanta5Prime - line.quanta5 != selectionRule;
+                case 6:
+                    return line.quanta6Prime - line.quanta6 != selectionRule;
+                default:
+                    return true;
+            }
+        }), series.end());
+        std::cout << "Enter quanta and selection rule separated by space: ";
+    }
+    return series;
+}

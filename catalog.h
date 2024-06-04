@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <algorithm>
 
 class Catalog {
   public:
@@ -33,6 +34,9 @@ class Catalog {
         int quanta6Prime;
 	};
     const std::vector<Line> &getLines();
+
+    std::vector<Catalog::Line> selectSeries();
+
   private:
     std::vector<Line> lines;
 
