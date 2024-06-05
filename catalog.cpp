@@ -1,4 +1,5 @@
 #include "catalog.h"
+#include <algorithm>
 
 Catalog::Catalog(std::string filepath) {
 	std::vector<Line> catalogLines;
@@ -72,29 +73,63 @@ int Catalog::convertQuantaToInt(std::string &quanta) {
 }
 
 std::vector<Catalog::Line> Catalog::selectSeries() {
-    std::vector<Catalog::Line> series(this->getLines());
-    int quanta, selectionRule;
-    std::cout << "Enter quanta and selection rule separated by space:\n" << "ex. for a-type R-branch 0,1 transitions, you would enterl '2 0' for deltaKa = 0, followed by '1 0' for R-branch, and finally '1 1' for deltaKc = 1\n";
-    while (std::cin >> quanta >> selectionRule) {
-        series.erase(std::remove_if(series.begin(), series.end(), [quanta, selectionRule](const Catalog::Line &line) {
-            switch (quanta) {
-                case 1:
-                    return line.quanta1Prime - line.quanta1 != selectionRule;
-                case 2:
-                    return line.quanta2Prime - line.quanta2 != selectionRule;
-                case 3:
-                    return line.quanta3Prime - line.quanta3 != selectionRule;
-                case 4:
-                    return line.quanta4Prime - line.quanta4 != selectionRule;
-                case 5:
-                    return line.quanta5Prime - line.quanta5 != selectionRule;
-                case 6:
-                    return line.quanta6Prime - line.quanta6 != selectionRule;
-                default:
-                    return true;
-            }
-        }), series.end());
-        std::cout << "Enter quanta and selection rule separated by space: ";
+	std::vector<Catalog::Line> branchLines;
+	int branch;
+	std::vector<int> branchPicks;
+	std::cout << "Please select 1 for R-Branch, 2 for P-Branch, 3 for "
+				 "Q-Branch, or 'q' to quit"
+			  << std::endl;
+	while (std::cin >> branch) {
+		branchPicks.push_back(branch);
+	}
+	for (auto &branch : branchPicks) {
+		if (branch == 1) {
+			std::copy_if(lines.begin(), lines.end(), std::back_inserter(branchLines),
+						 [](const Catalog::Line &line) {
+							 return line.quanta1 - line.quanta1Prime == 1;
+						 });
+		} else if (branch == 2) {
+			std::copy_if(lines.begin(), lines.end(), std::back_inserter(branchLines),
+						 [](const Catalog::Line &line) {
+							 return line.quanta1 - line.quanta1Prime == -1;
+						 });
+		} else if (branch == 3) {
+			std::copy_if(lines.begin(), lines.end(), std::back_inserter(branchLines),
+						 [](const Catalog::Line &line) {
+							 return line.quanta1 - line.quanta1Prime == 0;
+						 });
+		} 
+	}
+
+    std::cin.clear();
+    std::cin.ignore(1);
+    std::vector<Catalog::Line> series;
+    int type;
+    std::vector<int> typePicks;
+    std::cout << "Please select 1 for a-type, 2 for b-type, 3 for c-type, or 'q' to quit" << std::endl;
+    while (std::cin >> type) {
+        typePicks.push_back(type);
     }
-    return series;
+    for (auto &type : typePicks) {
+        if (type == 1) {
+            std::copy_if(branchLines.begin(), branchLines.end(), std::back_inserter(series),
+                         [](const Catalog::Line &line) {
+                             return (std::abs(line.quanta2 - line.quanta2Prime) % 2 == 0) &&
+                                    (std::abs(line.quanta3 - line.quanta3Prime) % 2 == 1); 
+                         });
+        } else if (type == 2) {
+            std::copy_if(branchLines.begin(), branchLines.end(), std::back_inserter(series),
+                         [](const Catalog::Line &line) {
+                             return (std::abs(line.quanta2 - line.quanta2Prime) % 2 == 1) &&
+                                    (std::abs(line.quanta3 - line.quanta3Prime) % 2 == 1); 
+                         });
+        } else if (type == 3) {
+            std::copy_if(branchLines.begin(), branchLines.end(), std::back_inserter(series),
+                         [](const Catalog::Line &line) {
+                             return (std::abs(line.quanta2 - line.quanta2Prime) % 2 == 1) &&
+                                    (std::abs(line.quanta3 - line.quanta3Prime) % 2 == 0); 
+                         });
+        } 
+    }
+	return series;
 }
