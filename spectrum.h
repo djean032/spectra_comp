@@ -3,26 +3,26 @@
 
 #include <cstring>
 #include <filesystem>
-#include <string>
 #include <fstream>
 #include <iostream>
 #include <numeric>
+#include <string>
 #include <vector>
 
 class Spectrum {
+  public:
+	Spectrum(std::string filepath);
+    const std::vector<double> getFreqs() const;
+    const std::vector<int> getIntensities() const;
+
   private:
-	std::vector<int> intensities;
-	std::vector<double> freqs;
-	std::tuple<std::vector<int>, std::vector<double>>
+    std::tuple<std::vector<double>, std::vector<int>>
 	readBinarySpectrum(const std::string &filepath);
 	std::vector<int> bytesToInt(const std::vector<std::byte> &bytes);
 	std::vector<double> bytesToDouble(const std::vector<std::byte> &bytes);
 	std::vector<double> constructFreqs(const std::vector<double> &freq_data);
-
-  public:
-	Spectrum(std::string filepath);
-	const std::vector<int> &getIntensities();
-	const std::vector<double> &getFreqs();
+    std::vector<double> freqs;
+    std::vector<int> intensities;
 };
 
 #endif // !SPECTRUM_H

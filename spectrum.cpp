@@ -1,6 +1,6 @@
 #include "spectrum.h"
 
-std::tuple<std::vector<int>, std::vector<double>>
+std::tuple<std::vector<double>, std::vector<int>>
 Spectrum::readBinarySpectrum(const std::string &filepath) {
 	std::filesystem::path inputFilePath{filepath};
 	auto length = std::filesystem::file_size(inputFilePath);
@@ -17,7 +17,7 @@ Spectrum::readBinarySpectrum(const std::string &filepath) {
 	std::vector<int> intensities = bytesToInt(intensities_bytes);
 	std::vector<double> frequency_doubles = bytesToDouble(frequency_bytes);
 	std::vector<double> freqs = constructFreqs(frequency_doubles);
-	return {intensities, freqs};
+	return {freqs, intensities};
 }
 
 std::vector<int> Spectrum::bytesToInt(const std::vector<std::byte> &bytes)
@@ -73,9 +73,13 @@ Spectrum::constructFreqs(const std::vector<double> &freq_data)
 }
 
 Spectrum::Spectrum(std::string filepath) {
-	std::tie(intensities, freqs) = readBinarySpectrum(filepath);
+    std::tie(freqs, intensities) = readBinarySpectrum(filepath);
 }
 
-const std::vector<int> &Spectrum::getIntensities() { return intensities; }
+const std::vector<double> Spectrum::getFreqs() const {
+    return freqs;
+}
+const std::vector<int> Spectrum::getIntensities() const {
+    return intensities;
+}
 
-const std::vector<double> &Spectrum::getFreqs() { return freqs; }
