@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
 				  << line.quanta5Prime << " " << line.quanta6Prime << std::endl;
 	}
 	*/
-	auto stackedIntensities = stacked(series, cyanomethcycloprop);
+	auto stackedIntensities = stacked(series, cyanomethcycloprop, 500);
     std::ofstream output("output.txt");
     for (auto &intensity : stackedIntensities) {
         output << intensity << std::endl;

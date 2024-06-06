@@ -1,11 +1,12 @@
 #include "stacking.h"
 
 std::vector<double> stacked(const std::vector<Catalog::Line> &lines,
-						 const Spectrum &spectrum) {
+						 const Spectrum &spectrum, const int &window) {
 	// get freqs of picked lines
 	std::vector<double> pickFreqs;
 	std::vector<int> stackIndices;
 	std::vector<std::vector<int>> pickedIntensities;
+    int windowHalfSize = window;
     std::vector<double> freqs = spectrum.getFreqs();
     std::vector<int> intensities = spectrum.getIntensities();
     double min_freq = std::min_element(freqs.begin(), freqs.end())[0];
@@ -26,27 +27,27 @@ std::vector<double> stacked(const std::vector<Catalog::Line> &lines,
 	}
 
 	for (auto &index : stackIndices) {
-		if (index < 50) {
-			std::vector<int> tmp(50 - index, 0);
-			std::copy(intensities.begin(), intensities.begin() + index + 50,
+		if (index < windowHalfSize) {
+			std::vector<int> tmp(windowHalfSize - index, 0);
+			std::copy(intensities.begin(), intensities.begin() + index + windowHalfSize,
 					  std::back_inserter(tmp));
 			pickedIntensities.push_back(tmp);
-		} else if (index > intensities.size() - 50) {
+		} else if (index > intensities.size() - windowHalfSize) {
 			std::vector<int> tmp;
-			std::copy(intensities.begin() + index - 50, intensities.end(),
+			std::copy(intensities.begin() + index - windowHalfSize, intensities.end(),
 					  std::back_inserter(tmp));
-			tmp.resize(100, 0);
+			tmp.resize(2 * windowHalfSize, 0);
 			pickedIntensities.push_back(tmp);
 		} else {
 			std::vector<int> tmp;
-			std::copy(intensities.begin() + index - 50,
-					  intensities.begin() + index + 50, std::back_inserter(tmp));
+			std::copy(intensities.begin() + index - windowHalfSize,
+					  intensities.begin() + index + windowHalfSize, std::back_inserter(tmp));
 			pickedIntensities.push_back(tmp);
 		}
 	}
     
 
-    std::vector<double> sumIntensities(100, 0.0);
+    std::vector<double> sumIntensities(2 * windowHalfSize, 0.0);
     std::vector<std::vector<double>> pickedIntensitiesDouble;
     std::transform(pickedIntensities.begin(), pickedIntensities.end(), std::back_inserter(pickedIntensitiesDouble), [](std::vector<int> &intensity) {
         std::vector<double> tmp;
